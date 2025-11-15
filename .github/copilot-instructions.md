@@ -50,11 +50,11 @@ cd android
 
 **Key configuration files**:
 - `gradle.properties`: Must include `android.useAndroidX=true` for AndroidX dependency support
-- `app/build.gradle.kts`: 
+- `app/build.gradle.kts`:
   - `minSdk=26` (WiFi Aware API level requirement)
   - Jetpack Compose enabled with BOM version 2024.02.00
   - Kotlin version aligned with Compose compiler
-- `AndroidManifest.xml`: 
+- `AndroidManifest.xml`:
   - Required permissions: `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`, `ACCESS_FINE_LOCATION`, `NEARBY_WIFI_DEVICES`
   - Required hardware feature: `android.hardware.wifi.aware` with `required="true"`
 

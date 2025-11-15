@@ -96,6 +96,30 @@ Edit `Info.plist` to include:
 <string>This app uses WiFi Aware to discover and communicate with nearby devices.</string>
 ```
 
+## Current State
+
+🚧 **Basic skeleton implemented**
+
+**Implemented:**
+
+- Xcode project structure
+- Basic SwiftUI app entry point (`WiFiAwareAppApp.swift`)
+- Placeholder UI view (`ContentView.swift`)
+- WiFi Aware entitlement configured
+- Info.plist with required descriptions
+
+**Pending:**
+
+- WiFi Aware framework integration
+- Service discovery implementation
+- Data path establishment
+- Message protocol handling
+- SwiftUI views for discovery and messaging
+- View models and service layer
+- Connection state management
+
+**Important:** Must test on physical iOS 18+ device with WiFi Aware support (iPhone 15 Pro+ or M1+ iPad). Simulator will not work.
+
 ## Testing
 
 ### Build for Device
@@ -134,18 +158,6 @@ For detailed setup, implementation, and troubleshooting:
 - [iOS Setup Guide](../docs/ios-setup.md)
 - [Architecture Documentation](../docs/architecture.md)
 
-## Status
-
-🚧 **Stub - Implementation pending**
-
-This is a placeholder structure. Full iOS app implementation will include:
-
-- Complete WiFi Aware framework integration
-- SwiftUI views and ViewModels
-- MVVM architecture
-- Message protocol implementation
-- Comprehensive error handling
-- Unit and UI tests
 
 ## Technology Stack
 
