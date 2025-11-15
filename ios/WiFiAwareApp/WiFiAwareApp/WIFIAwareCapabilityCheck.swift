@@ -6,7 +6,37 @@
 //
 
 import Foundation
-import WiFiAware
+
+// MARK: - WiFiAware Framework Stub
+// NOTE: WiFiAware framework is not yet available in current Xcode/iOS SDK (tested with iOS SDK 18.5)
+// These are stub implementations until Apple releases the framework.
+//
+// When the real framework becomes available:
+// 1. Remove these stub struct definitions
+// 2. Add: import WiFiAware
+// 3. Request WiFi Aware entitlement from Apple Developer Support
+// 4. The real WIFIAwarePublisher.isSupported and WIFIAwareSubscriber.isSupported will then work
+//
+// References:
+// - https://developer.apple.com/documentation/wifiaware
+// - https://developer.apple.com/documentation/wifiaware/wifiawarepublisher
+// - https://developer.apple.com/documentation/wifiaware/wifiawaresubscriber
+
+@available(iOS 18.0, *)
+struct WIFIAwarePublisher {
+    static var isSupported: Bool {
+        // Stub - will return false until real framework is available
+        return false
+    }
+}
+
+@available(iOS 18.0, *)
+struct WIFIAwareSubscriber {
+    static var isSupported: Bool {
+        // Stub - will return false until real framework is available
+        return false
+    }
+}
 
 /// Utility for checking WiFi Aware hardware and software support at runtime.
 ///

@@ -60,6 +60,16 @@ For the cross-platform message protocol and architecture, see [Architecture Docu
 
 🚧 **This is a proof-of-concept repository under active development**
 
+### Current Implementation Status
+
+| Platform | Build Status | Implementation Status |
+|----------|--------------|----------------------|
+| Raspberry Pi | 🟡 Partial | Entry point created, WiFi Aware manager pending |
+| Android | 🟢 Builds | Gradle setup complete, WiFi Aware manager pending |
+| iOS | 🟢 Builds | Xcode project complete, early capability checking implemented, awaiting real WiFiAware framework from Apple |
+
+**Note on iOS**: The WiFiAware framework is not yet available in the current Xcode SDK (tested with iOS SDK 18.5). The iOS project uses stub implementations to allow compilation. Once Apple releases the framework (likely requiring special entitlement approval), the stubs can be replaced with the real framework.
+
 ### POC Proof Plan
 
 The following phased approach will validate WiFi Aware functionality across platforms:

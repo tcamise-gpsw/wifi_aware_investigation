@@ -17,8 +17,10 @@ This iOS app discovers and connects to the Raspberry Pi WiFi Aware service, enab
 ### Software
 
 - macOS Ventura or later
-- Xcode 16.0 or later
+- Xcode 16.0 or later (with iOS SDK 18.0+)
 - Active Apple Developer account
+
+⚠️ **Framework Availability Note**: As of November 2025, the WiFiAware framework is not yet available in the standard Xcode SDK (tested with iOS SDK 18.5). The project currently uses stub implementations to allow compilation. Once Apple releases the framework (likely requiring entitlement approval), the stubs can be replaced with `import WiFiAware`.
 
 ## Device Compatibility
 
@@ -39,11 +41,10 @@ WiFi Aware is a new framework introduced in [iOS 18.0](https://developer.apple.c
 
 ### Runtime Capability Check
 
-Use the provided utility to check WiFi Aware support at runtime:
+The app includes early runtime capability checking that executes at app launch. Use the provided utility to check WiFi Aware support:
 
 ```swift
-import WiFiAware
-
+// Capability check runs automatically at app launch via AppState
 let capability = WIFIAwareCapabilityCheck()
 let result = capability.checkSupport()
 
@@ -55,7 +56,9 @@ case .notSupported(let reason):
 }
 ```
 
-See [`WiFiAwareApp/WIFIAwareCapabilityCheck.swift`](WiFiAwareApp/WIFIAwareCapabilityCheck.swift) for the implementation, which uses Apple's official `WIFIAwarePublisher.isSupported` and `WIFIAwareSubscriber.isSupported` properties.
+See [`WiFiAwareApp/WIFIAwareCapabilityCheck.swift`](WiFiAwareApp/WiFiAwareApp/WIFIAwareCapabilityCheck.swift) for the implementation. When the real framework is available, it will use Apple's official `WIFIAwarePublisher.isSupported` and `WIFIAwareSubscriber.isSupported` properties.
+
+**Current Implementation**: Uses stub types that return `false` until the real framework is released. The app displays an alert and disables WiFi Aware features when not supported.
 
 **References:**
 
@@ -67,11 +70,19 @@ See [`WiFiAwareApp/WIFIAwareCapabilityCheck.swift`](WiFiAwareApp/WIFIAwareCapabi
 
 ## Building the App
 
+### Initial Setup (First Time Only)
+
+The project structure is already set up. If starting fresh:
+
+1. The Xcode project is located at `WiFiAwareApp/WiFiAwareApp.xcodeproj`
+2. All source files are in `WiFiAwareApp/WiFiAwareApp/`
+3. No external dependencies (CocoaPods/SPM) required
+
 ### Open in Xcode
 
 ```bash
 cd wifi_aware_investigation/ios
-open WiFiAwareApp.xcodeproj
+open WiFiAwareApp/WiFiAwareApp.xcodeproj
 ```
 
 ### Configure Signing
@@ -80,21 +91,37 @@ open WiFiAwareApp.xcodeproj
 2. Select the WiFiAwareApp target
 3. Go to "Signing & Capabilities"
 4. Select your development team
-5. Ensure "Access WiFi Information" capability is added
+5. Xcode will automatically manage signing
 
 ### Build and Run
 
+**Simulator (for UI testing only):**
+
+1. Select any iOS Simulator as target
+2. Click Run (⌘R)
+3. Note: WiFi Aware will show as "Not Supported" (expected behavior)
+
+**Physical Device (required for WiFi Aware):**
+
 1. Connect your iOS 18+ device via USB
-2. Select your device as the target (not simulator)
+2. Select your device as the target
 3. Click Run (⌘R)
 4. App will install and launch on your device
 
 ### Command Line Build
 
 ```bash
-xcodebuild -project WiFiAwareApp.xcodeproj \
+cd wifi_aware_investigation/ios
+# For simulator
+xcodebuild -project WiFiAwareApp/WiFiAwareApp.xcodeproj \
     -scheme WiFiAwareApp \
-    -destination 'platform=iOS,name=Your iPhone' \
+    -sdk iphonesimulator \
+    build
+
+# For device (requires provisioning)
+xcodebuild -project WiFiAwareApp/WiFiAwareApp.xcodeproj \
+    -scheme WiFiAwareApp \
+    -sdk iphoneos \
     build
 ```
 
@@ -133,35 +160,48 @@ The app automatically:
 
 ```plaintext
 WiFiAwareApp/
-├── App/
-│   ├── WiFiAwareAppApp.swift       # App entry point
-│   └── ContentView.swift           # Main view
-├── WIFIAwareCapabilityCheck.swift  # Runtime capability check utility
-├── Info.plist
-└── WiFiAwareApp.entitlements       # Includes WiFi Aware entitlement
+├── WiFiAwareApp.xcodeproj/         # Xcode project file
+├── WiFiAwareApp/                    # Main app target
+│   ├── WiFiAwareAppApp.swift       # App entry point with early capability check
+│   ├── ContentView.swift           # Main view with support status display
+│   ├── WIFIAwareCapabilityCheck.swift  # Runtime capability check utility
+│   ├── WiFiAwareApp.entitlements   # Includes WiFi Aware entitlement (when available)
+│   └── Assets.xcassets/            # App assets
+├── WiFiAwareAppTests/              # Unit tests (empty)
+└── WiFiAwareAppUITests/            # UI tests (empty)
 ```
 
 ## Current State
 
-🚧 **Basic skeleton implemented**
+✅ **Project builds successfully**
 
 **Implemented:**
 
-- Xcode project structure
-- Basic SwiftUI app entry point
-- WiFi Aware entitlement configured
-- Info.plist with required descriptions
-- Runtime capability check utility (`WIFIAwareCapabilityCheck.swift`)
+- Xcode project structure with all source files
+- SwiftUI app with early WiFi Aware capability checking at launch
+- `AppState` manager that checks support immediately when app starts
+- UI displays support status with visual indicators
+- Alert shown if WiFi Aware is not supported with detailed reason
+- Discovery button disabled when WiFi Aware unavailable
+- WiFi Aware entitlement configured in entitlements file
+- Stub WiFiAware framework types (until real framework is released)
 
 **Pending:**
 
-- WiFi Aware framework integration
-- Service discovery implementation
-- Data path establishment
-- Message protocol handling
-- SwiftUI views for discovery and messaging
+- Replace stubs with real `import WiFiAware` when framework becomes available
+- Request WiFi Aware entitlement from Apple Developer Support
+- Service discovery implementation using `WIFIAwareSubscriber`
+- Data path establishment using `WIFIAwareDataSession`
+- Message protocol handling (JSON exchange per `../docs/architecture.md`)
+- SwiftUI views for discovery details and messaging
 
-**Important:** Must test on physical iOS 18+ device. Simulator will not work.
+**Build Status**: ✅ Compiles and runs on simulator and device (shows "Not Supported" until real framework available)
+
+**Important:** WiFi Aware functionality requires:
+
+1. Real WiFiAware framework from Apple (not yet available in SDK)
+2. Special entitlement approval from Apple Developer Support
+3. Physical iOS 18+ device with WiFi 6E hardware for testing
 
 ## Testing
 
