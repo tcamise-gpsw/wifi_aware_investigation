@@ -31,15 +31,43 @@ This is a **proof-of-concept** multi-platform WiFi Aware (NAN - Neighbor Awarene
 ### Android (android/)
 
 **Build system**: Gradle with Kotlin DSL
+
+**Prerequisites**:
+- Android SDK with API level 26+ (Android 8.0 Oreo or higher)
+- Gradle 9.0+ (included via wrapper)
+- JDK 17+ recommended
+
+**Building from command line**:
 ```bash
 cd android
-./gradlew assembleDebug  # Build
-./gradlew installDebug   # Install to device
+./gradlew assembleDebug      # Build debug APK
+./gradlew assembleRelease    # Build release APK (requires signing config)
+./gradlew installDebug       # Build and install to connected device/emulator
+./gradlew clean              # Clean build artifacts
 ```
 
-**Key files**:
-- `app/build.gradle.kts`: minSdk=26 (WiFi Aware requirement), Compose enabled
-- `AndroidManifest.xml`: Requires `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`, `ACCESS_FINE_LOCATION`, `NEARBY_WIFI_DEVICES`
+**Build output**: APK is generated at `app/build/outputs/apk/debug/app-debug.apk`
+
+**Key configuration files**:
+- `gradle.properties`: Must include `android.useAndroidX=true` for AndroidX dependency support
+- `app/build.gradle.kts`: 
+  - `minSdk=26` (WiFi Aware API level requirement)
+  - Jetpack Compose enabled with BOM version 2024.02.00
+  - Kotlin version aligned with Compose compiler
+- `AndroidManifest.xml`: 
+  - Required permissions: `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`, `ACCESS_FINE_LOCATION`, `NEARBY_WIFI_DEVICES`
+  - Required hardware feature: `android.hardware.wifi.aware` with `required="true"`
+
+**Common build issues**:
+1. **"android.useAndroidX property is not enabled"**: Create `gradle.properties` with `android.useAndroidX=true`
+2. **Missing launcher icons**: Ensure `mipmap-anydpi-v26/` contains `ic_launcher.xml` and `ic_launcher_round.xml` adaptive icons, with corresponding `drawable/ic_launcher_background.xml` and `drawable/ic_launcher_foreground.xml` resources
+3. **Gradle Daemon issues**: Run `./gradlew --stop` to stop all daemons, then retry build
+4. **SDK/JDK version mismatch**: Check `JAVA_HOME` and ensure JDK 17+ is installed
+
+**IDE setup**:
+- Open `android/` directory in Android Studio
+- Gradle sync will automatically download dependencies
+- Use "Build > Make Project" or "Build > Build Bundle(s) / APK(s) > Build APK(s)"
 
 **Current state**: Basic Compose UI skeleton exists (`MainActivity.kt`). WiFi Aware manager implementation is pending.
 

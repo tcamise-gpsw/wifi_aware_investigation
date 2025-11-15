@@ -49,33 +49,6 @@ cd wifi_aware_investigation/android
 ./gradlew installDebug
 ```
 
-## Project Structure
-
-```plaintext
-android/
-├── app/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/gopro/wifiaware/
-│   │   │   │   ├── ui/
-│   │   │   │   │   ├── MainActivity.kt
-│   │   │   │   │   ├── screens/
-│   │   │   │   │   └── viewmodels/
-│   │   │   │   ├── wifiaware/
-│   │   │   │   │   ├── WifiAwareManager.kt
-│   │   │   │   │   ├── DiscoverySession.kt
-│   │   │   │   │   └── DataPath.kt
-│   │   │   │   └── models/
-│   │   │   ├── AndroidManifest.xml
-│   │   │   └── res/
-│   │   └── test/
-│   ├── build.gradle.kts
-│   └── proguard-rules.pro
-├── gradle/
-├── build.gradle.kts
-├── settings.gradle.kts
-└── README.md
-```
 
 ## Key Features
 
@@ -99,6 +72,7 @@ The app requires these permissions:
 ## Configuration
 
 No configuration needed for basic usage. The app will automatically:
+
 - Request necessary permissions on first launch
 - Discover the RPi service named "rpi_control_service"
 - Establish data path when service is found
@@ -129,6 +103,7 @@ adb logcat -s WifiAware:D
 ## Documentation
 
 For detailed setup, implementation, and troubleshooting:
+
 - [Android Setup Guide](../docs/android-setup.md)
 - [Architecture Documentation](../docs/architecture.md)
 
@@ -137,6 +112,7 @@ For detailed setup, implementation, and troubleshooting:
 🚧 **Stub - Implementation pending**
 
 This is a placeholder structure. Full Android app implementation will include:
+
 - Complete WiFi Aware API integration
 - Jetpack Compose UI
 - ViewModel architecture
