@@ -18,7 +18,7 @@ The RPi serves as the control device in the WiFi Aware investigation, publishing
 ### Software
 
 - Raspberry Pi OS (64-bit recommended, Bookworm or newer)
-- Python 3.8+
+- Python 3.9+
 - wpa_supplicant 2.10+ with NAN support
 - NetworkManager
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
@@ -34,15 +34,23 @@ sudo apt update
 sudo apt upgrade -y
 ```
 
-### 2. Install Dependencies
+### 2. Install System Dependencies
 
 ```bash
+# Core system packages
 sudo apt install -y \
     wpasupplicant \
     network-manager \
     iw \
     git
+
+# Development libraries (required for Python dependencies)
+sudo apt install -y \
+    libdbus-1-dev \
+    libglib2.0-dev
 ```
+
+**Note**: The `libdbus-1-dev` and `libglib2.0-dev` packages are required to build the `dbus-python` dependency used by `python-networkmanager`.
 
 ### 3. Verify WiFi Aware Support
 
