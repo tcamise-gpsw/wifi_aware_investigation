@@ -87,18 +87,22 @@ open WiFiAwareApp.xcodeproj
 
 ### Raspberry Pi (rpi/)
 
-**Runtime**: Python 3.8+ with virtual environment
+**Build system**: uv (modern Python package manager)
+
+**Runtime**: Python 3.8+
+
+**Quick start**:
 ```bash
 cd rpi
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-sudo python3 main.py  # Requires root for WiFi operations
+uv sync                # Install dependencies in virtual environment
+sudo uv run python main.py  # Requires root for WiFi operations
 ```
 
-**Dependencies**: `pyroute2` (network management), `python-networkmanager` (NM integration), `PyYAML` (config parsing). See `requirements.txt`.
+**Dependencies**: `pyroute2` (network management), `python-networkmanager` (NM integration), `pyyaml` (config parsing), `aiohttp` (async HTTP). See `pyproject.toml` for full list.
 
 **Configuration**: `config/settings.yaml` defines service name, network interface (wlan0), and protocol settings.
+
+**Testing**: Run `uv run pytest tests/` for unit tests.
 
 **Current state**: Entry point (`main.py`) exists with logging and signal handling. Core WiFi Aware manager (`src/wifi_aware_manager.py`) not implemented yet.
 

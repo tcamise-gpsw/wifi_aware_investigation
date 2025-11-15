@@ -21,6 +21,9 @@ The RPi serves as the control device in the WiFi Aware investigation, publishing
 - Python 3.8+
 - wpa_supplicant 2.10+ with NAN support
 - NetworkManager
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+For complete setup details, see [docs/rpi-setup.md](../docs/rpi-setup.md)
 
 ## System Setup
 
@@ -37,8 +40,6 @@ sudo apt upgrade -y
 sudo apt install -y \
     wpasupplicant \
     network-manager \
-    python3-pip \
-    python3-venv \
     iw \
     git
 ```
@@ -74,18 +75,11 @@ sudo systemctl start NetworkManager
 cd /path/to/wifi_aware_investigation/rpi
 ```
 
-### 2. Create Virtual Environment
+### 2. Install Dependencies with uv
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Python Dependencies
-
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
+# Install dependencies (uv automatically creates a virtual environment)
+uv sync
 ```
 
 ## Configuration
@@ -110,11 +104,8 @@ logging:
 ### Manual Start
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate
-
 # Run with sudo (required for WiFi operations)
-sudo python3 main.py
+sudo uv run python main.py
 ```
 
 ### Run as Systemd Service
@@ -156,7 +147,7 @@ rpi/
 ├── scripts/                      # Utility scripts
 │   ├── start_service.sh
 │   └── test_connection.sh
-├── requirements.txt              # Python dependencies
+├── pyproject.toml                # Python dependencies
 └── main.py                       # Entry point
 ```
 
@@ -165,7 +156,7 @@ rpi/
 Run Python tests:
 
 ```bash
-pytest tests/
+uv run pytest tests/
 ```
 
 Manual connection test:
@@ -232,21 +223,3 @@ sudo usermod -aG netdev $USER
 - [Raspberry Pi Documentation](https://www.raspberrypi.com/documentation/)
 - [wpa_supplicant Documentation](https://w1.fi/wpa_supplicant/)
 - [Architecture Documentation](../docs/architecture.md)
-
-- Project structure with virtual environment support
-- Entry point (`main.py`) with logging and signal handling
-- Configuration structure (`config/settings.yaml`)
-- Dependency management (`requirements.txt`)
-- Basic startup script (`scripts/start_service.sh`)
-
-**Pending:**
-
-- Core WiFi Aware manager (`src/wifi_aware_manager.py`)
-- wpa_supplicant integration for NAN operations
-- Service publisher implementation
-- Device discovery and connection handlers
-- Data path and message protocol
-- Network interface management
-- Test utilities and validation scripts
-
-**Note:** Requires root privileges to run due to WiFi interface management requirements.
