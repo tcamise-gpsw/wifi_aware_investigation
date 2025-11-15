@@ -8,23 +8,33 @@ This iOS app discovers and connects to the Raspberry Pi WiFi Aware service, enab
 
 ## Prerequisites
 
-- iPhone or iPad with WiFi Aware support (iOS 18.0+)
-- Physical device required (WiFi Aware does not work on simulator)
+### Hardware
+
+- iPhone 15 Pro or later, OR iPad with M1 chip or later
+- iOS 18.0+ required
+- **Physical device required** - WiFi Aware does not work on simulator
+
+### Software
+
 - macOS Ventura or later
 - Xcode 16.0 or later
-- See [docs/ios-setup.md](../docs/ios-setup.md) for complete setup instructions
+- Active Apple Developer account
 
 ## Device Compatibility
 
-WiFi Aware is available on:
+WiFi Aware is a new framework introduced in iOS 18.0 with specific hardware requirements:
+
+**Compatible devices:**
 
 - iPhone 15 Pro and later
 - iPad models with M1 chip or later
-- Requires iOS 18.0+
 
-**Note**: This is a new framework introduced in iOS 18.
+**Requires:**
 
-## Quick Start
+- iOS 18.0+
+- WiFi Aware entitlement from Apple Developer Support
+
+## Building the App
 
 ### Open in Xcode
 
@@ -33,67 +43,70 @@ cd wifi_aware_investigation/ios
 open WiFiAwareApp.xcodeproj
 ```
 
-### Build and Run
+### Configure Signing
 
 1. Open project in Xcode
-2. Select your development team in Signing & Capabilities
-3. Connect your iOS device (simulator won't work)
-4. Select your device as the target
-5. Click Run (⌘ + R)
+2. Select the WiFiAwareApp target
+3. Go to "Signing & Capabilities"
+4. Select your development team
+5. Ensure "Access WiFi Information" capability is added
 
-## Project Structure
+### Build and Run
 
-```plaintext
-ios/
-├── WiFiAwareApp/
-│   ├── App/
-│   │   ├── WiFiAwareAppApp.swift
-│   │   └── ContentView.swift
-│   ├── Views/
-│   │   ├── DiscoveryView.swift
-│   │   ├── MessageView.swift
-│   │   └── Components/
-│   ├── ViewModels/
-│   │   ├── WiFiAwareViewModel.swift
-│   │   └── MessageViewModel.swift
-│   ├── Services/
-│   │   ├── WiFiAwareManager.swift
-│   │   ├── DiscoveryService.swift
-│   │   └── DataPathService.swift
-│   ├── Models/
-│   │   ├── Message.swift
-│   │   ├── DeviceInfo.swift
-│   │   └── ConnectionState.swift
-│   └── Utils/
-│       ├── Logger.swift
-│       └── Constants.swift
-├── WiFiAwareApp.xcodeproj
-└── README.md
+1. Connect your iOS 18+ device via USB
+2. Select your device as the target (not simulator)
+3. Click Run (⌘R)
+4. App will install and launch on your device
+
+### Command Line Build
+
+```bash
+xcodebuild -project WiFiAwareApp.xcodeproj \
+    -scheme WiFiAwareApp \
+    -destination 'platform=iOS,name=Your iPhone' \
+    build
 ```
 
-## Key Features
+## Running the App
 
-- WiFi Aware service discovery
-- Peer-to-peer data path establishment
-- Real-time message exchange
-- Connection state monitoring
-- SwiftUI interface
+### WiFi Aware Entitlement
 
-## Required Capabilities
+⚠️ **Important**: WiFi Aware requires a special entitlement that must be requested from Apple Developer Support:
 
-The app requires:
+```xml
+<key>com.apple.developer.networking.wifi-aware</key>
+<true/>
+```
 
-- WiFi Aware entitlement (request from Apple Developer)
-- Access WiFi Information capability
-- Local Network usage description
+Without this entitlement, WiFi Aware APIs will not function.
 
-## Configuration
+### First Launch
 
-Edit `Info.plist` to include:
+The app uses local network and WiFi, configured in `Info.plist`:
 
 ```xml
 <key>NSLocalNetworkUsageDescription</key>
 <string>This app uses WiFi Aware to discover and communicate with nearby devices.</string>
+```
+
+### What It Does
+
+The app automatically:
+
+- Checks for WiFi Aware availability on device
+- Subscribes to the "rpi_control_service"
+- Establishes data path when RPi is discovered
+- Exchanges JSON messages per the protocol in `../docs/architecture.md`
+
+## Project Structure
+
+```plaintext
+WiFiAwareApp/
+├── App/
+│   ├── WiFiAwareAppApp.swift       # App entry point
+│   └── ContentView.swift           # Main view
+├── Info.plist
+└── WiFiAwareApp.entitlements       # Includes WiFi Aware entitlement
 ```
 
 ## Current State
@@ -103,8 +116,7 @@ Edit `Info.plist` to include:
 **Implemented:**
 
 - Xcode project structure
-- Basic SwiftUI app entry point (`WiFiAwareAppApp.swift`)
-- Placeholder UI view (`ContentView.swift`)
+- Basic SwiftUI app entry point
 - WiFi Aware entitlement configured
 - Info.plist with required descriptions
 
@@ -115,73 +127,48 @@ Edit `Info.plist` to include:
 - Data path establishment
 - Message protocol handling
 - SwiftUI views for discovery and messaging
-- View models and service layer
-- Connection state management
 
-**Important:** Must test on physical iOS 18+ device with WiFi Aware support (iPhone 15 Pro+ or M1+ iPad). Simulator will not work.
+**Important:** Must test on physical iOS 18+ device. Simulator will not work.
 
 ## Testing
 
-### Build for Device
-
-WiFi Aware only works on physical devices:
+Run unit tests (when implemented):
 
 ```bash
-xcodebuild -project WiFiAwareApp.xcodeproj \
+xcodebuild test -project WiFiAwareApp.xcodeproj \
     -scheme WiFiAwareApp \
-    -destination 'platform=iOS,name=Your iPhone' \
-    build
+    -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
 ```
 
-### Manual Testing
+Manual testing checklist:
 
 1. Ensure RPi service is running
 2. Launch app on iOS device
-3. Tap "Start Discovery"
-4. Monitor connection status
+3. Verify WiFi Aware availability check
+4. Monitor discovery and connection status
 5. Test message exchange
 
 ## Debugging
 
-View logs in Xcode Console:
+View logs in Xcode Console with filter:
 
 ```plaintext
 subsystem:com.gopro.wifiaware
 ```
 
-Or use Instruments for detailed profiling.
+Common issues:
 
-## Documentation
-
-For detailed setup, implementation, and troubleshooting:
-
-- [iOS Setup Guide](../docs/ios-setup.md)
-- [Architecture Documentation](../docs/architecture.md)
-
+- **"WiFi Aware not available"**: Verify iOS 18+ and compatible hardware
+- **Entitlement error**: Request WiFi Aware entitlement from Apple
+- **Cannot build to device**: Check provisioning profile and signing
 
 ## Technology Stack
 
 - Swift 5.9+
 - SwiftUI
 - WiFi Aware framework
-- Combine
 - Network framework
 - MVVM architecture
-
-## Important Notes
-
-### WiFi Aware Entitlement
-
-The WiFi Aware framework requires a special entitlement from Apple:
-
-```xml
-<key>com.apple.developer.networking.wifi-aware</key>
-<true/>
-```
-
-You must request this entitlement through Apple Developer Support before you can use WiFi Aware in your app.
-
-### Simulator Limitation
 
 WiFi Aware does not work in the iOS Simulator. You must test on a physical device with iOS 18.0+ that supports WiFi Aware.
 
@@ -189,4 +176,4 @@ WiFi Aware does not work in the iOS Simulator. You must test on a physical devic
 
 - [Apple WiFi Aware Framework Documentation](https://developer.apple.com/documentation/WiFiAware)
 - [Network Framework Guide](https://developer.apple.com/documentation/network)
-- [WWDC WiFi Aware Sessions](https://developer.apple.com/videos/)
+- [Architecture Documentation](../docs/architecture.md)

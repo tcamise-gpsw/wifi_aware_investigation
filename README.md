@@ -28,11 +28,8 @@ WiFi Aware allows devices to:
 
 ```plaintext
 wifi_aware_investigation/
-├── docs/               # Detailed documentation
-│   ├── architecture.md
-│   ├── android-setup.md
-│   ├── ios-setup.md
-│   └── rpi-setup.md
+├── docs/               # Cross-platform documentation
+│   └── architecture.md # Message protocol and system architecture
 ├── rpi/               # Raspberry Pi control device
 ├── android/           # Android WiFi Aware app
 ├── ios/               # iOS WiFi Aware app
@@ -41,13 +38,13 @@ wifi_aware_investigation/
 
 ## Getting Started
 
-Each platform has specific requirements and setup steps. Please refer to the documentation in the `docs/` folder:
+Each platform has its own README with build and run instructions:
 
-1. **[Raspberry Pi Setup](docs/rpi-setup.md)** - Configure your RPi as the control device
-2. **[Android Setup](docs/android-setup.md)** - Build and run the Android app
-3. **[iOS Setup](docs/ios-setup.md)** - Build and run the iOS app
+1. **[Raspberry Pi](rpi/README.md)** - Setup RPi as the WiFi Aware publisher
+2. **[Android](android/README.md)** - Build and run the Android subscriber app
+3. **[iOS](ios/README.md)** - Build and run the iOS subscriber app
 
-For an overview of the system architecture and how the components interact, see [Architecture Documentation](docs/architecture.md).
+For the cross-platform message protocol and architecture, see [Architecture Documentation](docs/architecture.md).
 
 ## Prerequisites
 
@@ -62,6 +59,34 @@ For an overview of the system architecture and how the components interact, see 
 ## Project Status
 
 🚧 **This is a proof-of-concept repository under active development**
+
+### POC Proof Plan
+
+The following phased approach will validate WiFi Aware functionality across platforms:
+
+#### Phase 1: RPi Discovery Validation
+
+Prove the Raspberry Pi can be discovered using the existing [WiFi NAN Scan Android app](https://play.google.com/store/apps/details?id=com.google.android.apps.location.rtt.wifinanscan&hl=en_US) from the Google Play Store. This validates our RPi publisher implementation before investing in custom client development.
+
+**Success criteria**: WiFi NAN Scan app successfully discovers the RPi's published service and displays connection information.
+
+#### Phase 2: Custom Android Implementation
+
+Implement our custom Android project to replace the WiFi NAN Scan app, proving our Android implementation can discover and communicate with the RPi.
+
+**Success criteria**: Our Android app discovers the RPi service and exchanges JSON-formatted messages per the protocol defined in `docs/architecture.md`.
+
+#### Phase 3: iOS Implementation
+
+Implement our iOS project to replace the Android project in the test setup, proving our iOS implementation works independently.
+
+**Success criteria**: Our iOS app discovers the RPi service and exchanges JSON-formatted messages per the protocol defined in `docs/architecture.md`.
+
+#### Phase 4: Multi-Platform Integration
+
+Test our Android and iOS projects together, both connecting to the RPi simultaneously to validate concurrent multi-platform communication.
+
+**Success criteria**: Both Android and iOS apps can discover the RPi and communicate with it at the same time without interference, demonstrating full cross-platform WiFi Aware capability.
 
 ## License
 

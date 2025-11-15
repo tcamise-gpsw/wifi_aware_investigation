@@ -121,9 +121,9 @@ Examples:
 
 ### File Organization
 
-- **Documentation first**: All setup guides live in `docs/` (platform-specific: `android-setup.md`, `ios-setup.md`, `rpi-setup.md`)
-- **Platform isolation**: Each platform directory is self-contained with its own build system and README
-- **Shared protocol**: Message formats defined in `docs/architecture.md` are the contract between platforms
+- **Cross-platform documentation**: `docs/architecture.md` contains the message protocol specification that all platforms must follow
+- **Platform-specific docs**: Each platform directory (`android/`, `ios/`, `rpi/`) has its own README with build/run instructions
+- **Platform isolation**: Each platform directory is self-contained with its own build system and dependencies
 
 ### Testing Strategy
 

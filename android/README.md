@@ -8,46 +8,58 @@ This Android app discovers and connects to the Raspberry Pi WiFi Aware service, 
 
 ## Prerequisites
 
+### Hardware
+
 - Android device with WiFi Aware support (Android 8.0+, API level 26+)
+- Not all Android devices support WiFi Aware - verify before testing
+
+### Software
+
 - Android Studio (latest stable version)
-- JDK 11 or higher
-- See [docs/android-setup.md](../docs/android-setup.md) for complete setup instructions
+- JDK 17+ (recommended)
+- Android SDK with API level 26+
 
 ## Device Compatibility
 
-Not all Android devices support WiFi Aware. Check compatibility:
+Verify your device supports WiFi Aware:
 
 ```bash
 adb shell pm list features | grep wifi.aware
 ```
 
+Should return: `feature:android.hardware.wifi.aware`
+
 Common compatible devices:
+
 - Google Pixel 2 and newer
 - Samsung Galaxy S9 and newer
 - OnePlus 6 and newer
 
-## Quick Start
+## Building the App
 
-### Open in Android Studio
+### Option 1: Android Studio
 
-```bash
-cd wifi_aware_investigation/android
-# Open this directory in Android Studio
-```
+1. Open the `android/` directory in Android Studio
+2. Wait for Gradle sync to complete
+3. Connect your Android device via USB
+4. Click Run (⌘R or Shift+F10)
 
-### Build and Run
-
-1. Open project in Android Studio
-2. Sync Gradle files
-3. Connect your Android device
-4. Click Run (Shift + F10)
-
-### Command Line Build
+### Option 2: Command Line
 
 ```bash
+cd android
+
+# Build debug APK
 ./gradlew assembleDebug
+
+# Build and install to connected device
 ./gradlew installDebug
+
+# Clean build artifacts
+./gradlew clean
 ```
+
+Build output: `app/build/outputs/apk/debug/app-debug.apk`
 
 
 ## Key Features
@@ -58,25 +70,34 @@ cd wifi_aware_investigation/android
 - Connection state monitoring
 - Material Design 3 UI
 
-## Required Permissions
+## Running the App
 
-The app requires these permissions:
+### First Launch
+
+The app will request the following permissions:
+
+- **Location** (required for WiFi scanning, even though WiFi Aware is proximity-based)
+- **Nearby devices** (Android 12+)
+
+Ensure WiFi and Location services are enabled on your device.
+
+### What It Does
+
+The app automatically:
+
+- Discovers the RPi service named "rpi_control_service"
+- Establishes peer-to-peer data path when service is found
+- Exchanges JSON messages per the protocol in `../docs/architecture.md`
+
+### Required Permissions (already configured)
 
 ```xml
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+<uses-feature android:name="android.hardware.wifi.aware" android:required="true" />
 ```
-
-## Configuration
-
-No configuration needed for basic usage. The app will automatically:
-
-- Request necessary permissions on first launch
-- Discover the RPi service named "rpi_control_service"
-- Establish data path when service is found
-- Begin message exchange
 
 ## Testing
 
@@ -94,11 +115,32 @@ No configuration needed for basic usage. The app will automatically:
 
 ## Debugging
 
-Enable verbose logging:
+### View Logs
 
 ```bash
+# Filter for WiFi Aware logs
 adb logcat -s WifiAware:D
+
+# View all app logs
+adb logcat | grep com.yourpackage
 ```
+
+### Common Issues
+
+**Issue**: Device doesn't support WiFi Aware
+**Solution**: Verify with `adb shell pm list features | grep wifi.aware`
+
+**Issue**: Service not discovered
+**Solution**: Ensure RPi is running and publishing, both devices within ~30m range
+
+**Issue**: Permission denied errors
+**Solution**: Grant location permissions in Settings > Apps > WiFi Aware App
+
+## Resources
+
+- [Android WiFi Aware Guide](https://developer.android.com/develop/connectivity/wifi/wifi-aware)
+- [WiFi Aware API Reference](https://developer.android.com/reference/android/net/wifi/aware/package-summary)
+- [Architecture Documentation](../docs/architecture.md)
 
 ## Documentation
 
