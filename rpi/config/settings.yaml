@@ -1,0 +1,14 @@
+wifi_aware:
+  service_name: "rpi_control_service"
+  service_info: "RPi WiFi Aware Control"
+
+network:
+  interface: "wlan0"
+
+logging:
+  level: "INFO"
+  file: "/var/log/wifi_aware.log"
+
+protocol:
+  message_format: "json"
+  max_message_size: 4096
