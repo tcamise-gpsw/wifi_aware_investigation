@@ -26,84 +26,127 @@ import sys
 from pyroute2 import IW
 
 
-def check_nan_support(interface: str = 'wlan0') -> bool:
+def get_all_wiphy_info() -> list[dict]:
     """
-    Check if wireless interface supports NAN (Neighbor Awareness Networking) mode.
-
-    Uses nl80211 netlink interface to query supported interface types.
-    The NL80211_IFTYPE_NAN interface type indicates hardware and driver support
-    for WiFi Aware/NAN operations.
-
-    Args:
-        interface: Wireless interface name (e.g., 'wlan0')
+    Get information about all wireless physical devices (wiphys).
 
     Returns:
-        bool: True if NAN is supported, False otherwise
+        list[dict]: List of wiphy information dictionaries containing:
+            - wiphy_name: Physical device name (e.g., 'phy0')
+            - wiphy_index: Numeric index
+            - interfaces: List of interface names using this wiphy
+            - supported_modes: List of supported interface types
+            - nan_supported: Boolean indicating NAN support
 
     Raises:
-        KeyError: If interface doesn't exist
-        PermissionError: If insufficient permissions to query netlink
+        RuntimeError: If no wireless devices found or query fails
     """
     iw = IW()
     try:
-        # Get physical device (wiphy) for this interface
-        phyname = iw.get_interface_by_ifname(interface)['attrs']['NL80211_ATTR_WIPHY']
+        # Get list of wireless physical devices (wiphys)
+        wiphy_list = list(iw.list_wiphy())
 
-        # Query wiphy capabilities
-        wiphy = iw.get_wiphy(phyname)
+        if not wiphy_list:
+            raise RuntimeError("No wireless devices found")
 
-        # Check supported interface types for NL80211_IFTYPE_NAN
-        for attr in wiphy['attrs']:
-            if attr[0] == 'NL80211_ATTR_SUPPORTED_IFTYPES':
-                modes = [mode[1]['nla'][1] for mode in attr[1]['attrs']]
-                if 'NL80211_IFTYPE_NAN' in modes:
-                    return True
-        return False
+        # Get all interfaces to map them to their wiphys
+        iface_list = iw.get_interfaces_dump()
+
+        # Build wiphy -> interfaces mapping
+        wiphy_interfaces = {}
+        for iface in iface_list:
+            attrs_dict = dict(iface['attrs'])
+            wiphy_idx = attrs_dict.get('NL80211_ATTR_WIPHY')
+            ifname = attrs_dict.get('NL80211_ATTR_IFNAME')
+            if wiphy_idx is not None and ifname is not None:
+                if wiphy_idx not in wiphy_interfaces:
+                    wiphy_interfaces[wiphy_idx] = []
+                wiphy_interfaces[wiphy_idx].append(ifname)
+
+        # Process each wiphy
+        results = []
+        for wiphy_data in wiphy_list:
+            attrs_dict = dict(wiphy_data['attrs'])
+
+            wiphy_idx = attrs_dict.get('NL80211_ATTR_WIPHY')
+            wiphy_name = attrs_dict.get('NL80211_ATTR_WIPHY_NAME', 'unknown')
+            supported_modes = attrs_dict.get('NL80211_ATTR_SUPPORTED_IFTYPES', [])
+
+            # Check if NAN is in the supported modes
+            nan_supported = 'nan' in [mode.lower() for mode in supported_modes]
+
+            results.append({
+                'wiphy_name': wiphy_name,
+                'wiphy_index': wiphy_idx,
+                'interfaces': wiphy_interfaces.get(wiphy_idx, []),
+                'supported_modes': supported_modes,
+                'nan_supported': nan_supported
+            })
+
+        return results
+
     finally:
         iw.close()
-
-
 def main():
     """Main entry point for NAN support check."""
-    # Get interface from command line or use default
-    interface = sys.argv[1] if len(sys.argv) > 1 else 'wlan0'
-
     try:
-        if check_nan_support(interface):
-            print(f"✓ NAN support detected on interface '{interface}'")
-            print("  WiFi Aware functionality should be available.")
+        wiphy_info_list = get_all_wiphy_info()
+
+        print("WiFi Aware (NAN) Support Check")
+        print("=" * 60)
+        print()
+
+        any_nan_supported = False
+
+        for idx, wiphy_info in enumerate(wiphy_info_list):
+            if idx > 0:
+                print()
+                print("-" * 60)
+                print()
+
+            print(f"Physical Device: {wiphy_info['wiphy_name']} (index: {wiphy_info['wiphy_index']})")
+
+            # List interfaces
+            if wiphy_info['interfaces']:
+                print(f"Interfaces: {', '.join(wiphy_info['interfaces'])}")
+            else:
+                print("Interfaces: (none)")
+
+            # List supported modes
+            print(f"\nSupported interface modes:")
+            for mode in wiphy_info['supported_modes']:
+                marker = "✓" if mode.lower() == 'nan' else " "
+                print(f"  {marker} {mode}")
+
+            # NAN support status
+            print()
+            if wiphy_info['nan_supported']:
+                print(f"✓ NAN support detected")
+                print(f"  WiFi Aware functionality is available on this device.")
+                any_nan_supported = True
+            else:
+                print(f"✗ NAN not supported")
+                print(f"  WiFi Aware will not work with this device.")
+
+        print()
+        print("=" * 60)
+        print()
+
+        # Overall summary
+        if any_nan_supported:
+            print("✓ At least one device supports WiFi Aware (NAN)")
             sys.exit(0)
         else:
-            print(f"✗ NAN not supported on interface '{interface}'")
-            print("  WiFi Aware will not work with this hardware/driver combination.")
+            print("✗ No devices support WiFi Aware (NAN)")
             print("  Consider using a USB WiFi adapter with NAN support.")
             sys.exit(1)
 
-    except KeyError:
-        print(f"✗ Error: Interface '{interface}' not found", file=sys.stderr)
-        print("  Available interfaces:", file=sys.stderr)
-
-        # Try to list available wireless interfaces
-        try:
-            iw = IW()
-            interfaces = iw.get_interfaces()
-            for iface in interfaces:
-                ifname = dict(iface['attrs']).get('NL80211_ATTR_IFNAME', 'unknown')
-                print(f"    - {ifname}", file=sys.stderr)
-            iw.close()
-        except Exception:
-            print("    (unable to enumerate interfaces)", file=sys.stderr)
-
-        sys.exit(2)
-
-    except PermissionError:
-        print(f"✗ Error: Insufficient permissions to query interface '{interface}'", file=sys.stderr)
-        print("  Try running with sudo: sudo python check_nan_support.py", file=sys.stderr)
-        sys.exit(3)
-
     except Exception as e:
         print(f"✗ Error: {e}", file=sys.stderr)
-        sys.exit(4)
+        print(f"  Try running with sudo if you get permission errors.", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(3)
 
 
 if __name__ == '__main__':
