@@ -46,15 +46,35 @@ sudo apt install -y \
 
 ### 3. Verify WiFi Aware Support
 
+⚠️ **Hardware Support Investigation Required**
+
+WiFi Aware (NAN - Neighbor Awareness Networking) support requires both hardware and software capabilities. Use the provided verification script to check your system:
+
 ```bash
-# Check for NAN support
-iw list | grep -i "nan"
+# Check NAN support on default interface (wlan0)
+uv run python scripts/check_nan_support.py
 
-# Should see "nan" in supported interface modes
-
-# Verify wpa_supplicant version (need 2.10+)
-wpa_supplicant -v
+# Check specific interface
+uv run python scripts/check_nan_support.py wlan1
 ```
+
+This script uses the **pyroute2** library to query the Linux kernel's nl80211 netlink API, checking if the driver reports the `NL80211_IFTYPE_NAN` interface type. See [`scripts/check_nan_support.py`](scripts/check_nan_support.py) for the implementation.
+
+**References:**
+
+- [pyroute2 Documentation](https://pyroute2.org/) - Python netlink interface
+- [Linux nl80211 API](https://www.kernel.org/doc/html/latest/userspace-api/netlink/intro.html) - Kernel wireless subsystem API
+- [nl80211.h Interface Types](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/nl80211.h) - Official kernel header defining `NL80211_IFTYPE_NAN`
+
+**Hardware Notes:**
+
+- Raspberry Pi 4 uses Broadcom BCM43455 WiFi chip ([RPi 4 Specifications](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/))
+- NAN support in BCM43455 requires verification through testing
+- Linux kernel 4.9+ includes [cfg80211 NAN infrastructure](https://www.kernel.org/doc/html/latest/networking/mac80211.html)
+- Driver support depends on brcmfmac module with NAN compiled in
+- wpa_supplicant 2.10+ required for NAN operations ([ChangeLog](https://w1.fi/cgit/hostap/plain/wpa_supplicant/ChangeLog))
+
+**Alternative:** If built-in WiFi doesn't support NAN, consider USB WiFi adapters with confirmed 802.11 NAN support.
 
 ### 4. Configure NetworkManager
 
@@ -221,5 +241,10 @@ sudo usermod -aG netdev $USER
 ## Resources
 
 - [Raspberry Pi Documentation](https://www.raspberrypi.com/documentation/)
+- [Raspberry Pi 4 Specifications](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/)
 - [wpa_supplicant Documentation](https://w1.fi/wpa_supplicant/)
+- [wpa_supplicant ChangeLog (NAN support)](https://w1.fi/cgit/hostap/plain/wpa_supplicant/ChangeLog)
+- [Linux Wireless Wiki - NAN](https://wireless.wiki.kernel.org/en/users/documentation/nan)
+- [WiFi Alliance - WiFi Aware Overview](https://www.wi-fi.org/discover-wi-fi/wi-fi-aware)
+- [cfg80211 MAC80211 Documentation](https://www.kernel.org/doc/html/latest/networking/mac80211.html)
 - [Architecture Documentation](../docs/architecture.md)

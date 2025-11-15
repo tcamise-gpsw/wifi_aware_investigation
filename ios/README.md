@@ -22,17 +22,48 @@ This iOS app discovers and connects to the Raspberry Pi WiFi Aware service, enab
 
 ## Device Compatibility
 
-WiFi Aware is a new framework introduced in iOS 18.0 with specific hardware requirements:
+⚠️ **Hardware Requirements Under Investigation**
 
-**Compatible devices:**
+WiFi Aware is a new framework introduced in [iOS 18.0](https://developer.apple.com/documentation/wifiaware) with specific hardware requirements. Apple has not published an official list of compatible devices.
 
-- iPhone 15 Pro and later
-- iPad models with M1 chip or later
+**Likely compatible devices (unverified):**
 
-**Requires:**
+- iPhone 15 Pro and later (WiFi 6E chipset)
+- iPad models with M1 chip or later (WiFi 6E support)
 
-- iOS 18.0+
+**Confirmed requirements:**
+
+- iOS 18.0+ (see [WiFi Aware Framework Documentation](https://developer.apple.com/documentation/wifiaware))
 - WiFi Aware entitlement from Apple Developer Support
+- Physical device with WiFi 6E hardware (802.11ax with NAN support)
+
+### Runtime Capability Check
+
+Use the provided utility to check WiFi Aware support at runtime:
+
+```swift
+import WiFiAware
+
+let capability = WIFIAwareCapabilityCheck()
+let result = capability.checkSupport()
+
+switch result {
+case .supported:
+    print("✓ WiFi Aware is available")
+case .notSupported(let reason):
+    print("✗ Not available: \(reason)")
+}
+```
+
+See [`WiFiAwareApp/WIFIAwareCapabilityCheck.swift`](WiFiAwareApp/WIFIAwareCapabilityCheck.swift) for the implementation, which uses Apple's official `WIFIAwarePublisher.isSupported` and `WIFIAwareSubscriber.isSupported` properties.
+
+**References:**
+
+- [WiFi Aware Framework Documentation](https://developer.apple.com/documentation/wifiaware)
+- [WIFIAwarePublisher.isSupported](https://developer.apple.com/documentation/wifiaware/wifiawarepublisher/issupported)
+- [WIFIAwareSubscriber.isSupported](https://developer.apple.com/documentation/wifiaware/wifiawaresubscriber/issupported)
+
+**Note:** The specific device compatibility list above is based on WiFi 6E hardware availability and has not been officially confirmed by Apple. The runtime check is the authoritative way to determine support.
 
 ## Building the App
 
@@ -105,6 +136,7 @@ WiFiAwareApp/
 ├── App/
 │   ├── WiFiAwareAppApp.swift       # App entry point
 │   └── ContentView.swift           # Main view
+├── WIFIAwareCapabilityCheck.swift  # Runtime capability check utility
 ├── Info.plist
 └── WiFiAwareApp.entitlements       # Includes WiFi Aware entitlement
 ```
@@ -119,6 +151,7 @@ WiFiAwareApp/
 - Basic SwiftUI app entry point
 - WiFi Aware entitlement configured
 - Info.plist with required descriptions
+- Runtime capability check utility (`WIFIAwareCapabilityCheck.swift`)
 
 **Pending:**
 
@@ -174,6 +207,8 @@ WiFi Aware does not work in the iOS Simulator. You must test on a physical devic
 
 ## Resources
 
-- [Apple WiFi Aware Framework Documentation](https://developer.apple.com/documentation/WiFiAware)
+- [Apple WiFi Aware Framework Documentation](https://developer.apple.com/documentation/wifiaware)
 - [Network Framework Guide](https://developer.apple.com/documentation/network)
+- [WiFi Alliance - WiFi Aware Overview](https://www.wi-fi.org/discover-wi-fi/wi-fi-aware)
+- [IEEE 802.11 NAN Specification](https://standards.ieee.org/ieee/802.11/7028/)
 - [Architecture Documentation](../docs/architecture.md)
