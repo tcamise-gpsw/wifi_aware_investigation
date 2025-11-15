@@ -1,0 +1,35 @@
+[project]
+name = "wifi-aware-rpi"
+version = "0.1.0"
+description = "WiFi Aware Control Service for Raspberry Pi"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "GoPro", email = ""},
+]
+dependencies = [
+    "pyroute2>=0.7.9",
+    "python-networkmanager>=2.2",
+    "aiohttp>=3.9.1",
+    "pyyaml>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+]
+
+[project.scripts]
+wifi-aware-service = "main:main"
